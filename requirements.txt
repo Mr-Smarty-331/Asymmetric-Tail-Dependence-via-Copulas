@@ -1,0 +1,22 @@
+# Core numerical & data
+numpy>=1.26.0
+pandas>=2.0.0
+scipy>=1.11.0
+pyarrow>=14.0.0
+
+# Financial data
+yfinance>=0.2.35
+
+# Reporting & validation
+pydantic>=2.5.0
+fpdf2>=2.7.0
+python-dotenv>=1.0.0
+pyyaml>=6.0.0
+
+# Dashboard & visualization
+streamlit>=1.30.0
+plotly>=5.18.0
+
+# Testing & QA
+pytest>=7.4.0
+pytest-cov>=4.1.0

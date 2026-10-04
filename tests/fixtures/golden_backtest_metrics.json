@@ -1,0 +1,10 @@
+{
+  "n_obs": 100,
+  "n_exceptions": 2,
+  "exception_rate": 0.02,
+  "traffic_light": "Amber",
+  "kupiec_pvalue": 0.376309,
+  "christoffersen_pvalue": 0.773964,
+  "mean_var": 0.035013,
+  "mean_es": 0.044798
+}
