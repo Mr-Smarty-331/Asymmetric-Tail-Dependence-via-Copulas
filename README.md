@@ -91,8 +91,8 @@ $$LR_{\text{cc}} = LR_{\text{pof}} + LR_{\text{ind}} \sim \chi^2(2)$$
 
 ### 1. Clone & Install Dependencies
 ```bash
-git clone https://github.com/your-org/AsymTailDep.git
-cd AsymTailDep
+git clone https://github.com/Mr-Smarty-331/Asymmetric-Tail-Dependence-via-Copulas.git
+cd Asymmetric-Tail-Dependence-via-Copulas
 make install
 ```
 
