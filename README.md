@@ -37,6 +37,65 @@ AsymTailDep/
 └── requirements.txt         # Pinned production dependencies
 ```
 
+### System Flowchart
+
+```mermaid
+flowchart TD
+    subgraph DataLayer["1. Data Ingestion & Preprocessing"]
+        A["Market Data Ingestion<br/>(SPY, QQQ, TLT / yfinance)"] --> B["Forward-Fill & Cleaning"]
+        B --> C["Continuous Log-Returns<br/>r_t = ln(P_t / P_t-1)"]
+        C --> D[("On-Disk Parquet/CSV Cache")]
+    end
+
+    subgraph MarginalsLayer["2. Univariate Marginals & PIT"]
+        D --> E["Student-t Fit per Asset<br/>nu in [2.01, 100], mu, sigma"]
+        E --> F["Goodness-of-Fit<br/>Kolmogorov-Smirnov Test"]
+        E --> G["Probability Integral Transform (PIT)<br/>U_i = F_i(r_i) in (0, 1)"]
+    end
+
+    subgraph CopulaEngine["3. Copula Dependence & Simulation"]
+        G --> H["Rank Correlation<br/>Kendall tau Matrix"]
+        H --> I["Tau Inversion<br/>R = sin(pi * tau / 2)"]
+        I --> J["Higham Spectral Projection<br/>Nearest-PSD Repair"]
+        J --> K["Profile Log-Likelihood<br/>Copula nu MLE Optimization"]
+        K --> L["Analytic Tail-Dep Coeff<br/>lambda_L = lambda_U"]
+        J & K --> M["Monte Carlo Copula Sampler<br/>U_sim ~ Copula(R, nu)"]
+        M --> N["Inverse PIT Quantile Mapping<br/>R_sim = F^-1(U_sim)"]
+        N --> O["Portfolio Loss Distribution<br/>L = -w^T R_sim"]
+        O --> P["Forecast Risk Metrics<br/>VaR_0.99 & ES_0.99"]
+    end
+
+    subgraph BacktestEngine["4. Rolling Backtester & Validation"]
+        D --> Q["Rolling Window Loop [t-W : t-1]<br/>Strict No-Lookahead Bias"]
+        P & Q --> R["Realized Portfolio Loss on Day t<br/>L_t = -w^T r_t"]
+        R --> S{"Exception Breach?<br/>L_t > VaR_t"}
+        S --> T["Kupiec POF Test<br/>LR_pof ~ chi^2(1)"]
+        S --> U["Christoffersen Markov Test<br/>LR_ind ~ chi^2(1) & LR_cc ~ chi^2(2)"]
+        S --> V["Basel Committee Traffic Light<br/>Green / Amber / Red"]
+    end
+
+    subgraph AuditEngine["5. Autonomous Auditor & RNIV"]
+        T & U & V --> W["Deterministic RNIV Engine<br/>Base Add-on + Clustering Surcharge"]
+        W --> X["Sign-off Governance<br/>APPROVED / CONDITIONAL / REJECTED"]
+        W & X --> Y["LLM Narrative Generator<br/>(MockLLM / OpenAI / Gemini)"]
+        Y --> Z["Grounding & Fact Verification Check"]
+    end
+
+    subgraph DashboardLayer["6. Interactive UI & Export"]
+        V & W & X & Z --> AA["Streamlit Analytics Dashboard"]
+        AA --> AB["Plotly Interactive Chart<br/>P&L, VaR/ES Bands, Breach Dots"]
+        AA --> AC["Scorecard KPIs & Basel Badges"]
+        AA --> AD["Export Deliverables<br/>Markdown | JSON | PDF (fpdf2)"]
+    end
+
+    style DataLayer fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#f8fafc
+    style MarginalsLayer fill:#0f172a,stroke:#818cf8,stroke-width:2px,color:#f8fafc
+    style CopulaEngine fill:#0f172a,stroke:#34d399,stroke-width:2px,color:#f8fafc
+    style BacktestEngine fill:#0f172a,stroke:#fbbf24,stroke-width:2px,color:#f8fafc
+    style AuditEngine fill:#0f172a,stroke:#f472b6,stroke-width:2px,color:#f8fafc
+    style DashboardLayer fill:#0f172a,stroke:#a78bfa,stroke-width:2px,color:#f8fafc
+```
+
 ---
 
 ## 📐 Mathematical & Quantitative Framework
